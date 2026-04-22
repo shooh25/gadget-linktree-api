@@ -9,3 +9,7 @@ func NewUserId(value string) UserId {
 		value: value,
 	}
 }
+
+func (u UserId) Value() string {
+	return u.value
+}
