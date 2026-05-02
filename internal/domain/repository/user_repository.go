@@ -7,7 +7,7 @@ type UserRepository interface {
 	ExistsByGoogleId(googleId string) (bool, error)
 
 	// ユーザー保存
-	Save(user user.User) error
+	Save(u user.User) error
 
 	// ユーザー取得
 	FindByUserId(userId user.UserId) (*user.User, error)

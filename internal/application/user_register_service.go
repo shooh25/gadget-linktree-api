@@ -4,7 +4,7 @@ import (
 	"errors"
 	"gadget-linktree-api/internal/domain/model/user"
 	"gadget-linktree-api/internal/domain/repository"
-	"log"
+	"log/slog"
 )
 
 type UserRegisterService struct {
@@ -27,10 +27,11 @@ func (s *UserRegisterService) UserRegister(dto UserRegisterDto) error {
 	// ユーザーが既に存在するかチェック
 	exists, err := s.repo.ExistsByGoogleId(dto.GoogleId)
 	if err != nil {
+		slog.Error("failed to check if user exists", "err", err, "googleId", dto.GoogleId)
 		return err
 	}
 	if exists {
-		log.Printf("user already exists: %s", dto.GoogleId)
+		slog.Error("user already exists", "googleId", dto.GoogleId)
 		return errors.New("user already exists")
 	}
 
@@ -44,10 +45,10 @@ func (s *UserRegisterService) UserRegister(dto UserRegisterDto) error {
 	err = s.repo.Save(*newUser)
 
 	if err != nil {
-		log.Printf("failed to save user: %v", err)
+		slog.Error("failed to save user", "err", err, "googleId", dto.GoogleId)
 		return err
 	}
 
-	log.Printf("user saved successfully: %s", dto.GoogleId)
+	slog.Info("user saved successfully", "googleId", dto.GoogleId)
 	return nil
 }

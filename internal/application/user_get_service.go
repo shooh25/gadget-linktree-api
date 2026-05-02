@@ -3,7 +3,7 @@ package application
 import (
 	"gadget-linktree-api/internal/domain/model/user"
 	"gadget-linktree-api/internal/domain/repository"
-	"log"
+	"log/slog"
 )
 
 
@@ -20,7 +20,7 @@ func NewUserGetService(repo repository.UserRepository) *UserGetService {
 func (s *UserGetService) GetUser(userId user.UserId) (*user.User, error) {
 	u, err := s.repo.FindByUserId(userId)
 	if err != nil {
-		log.Printf("failed to get user: %v", err)
+		slog.Error("failed to get user", "err", err, "userId", userId.Value())
 		return nil, err
 	}
 	return u, nil
