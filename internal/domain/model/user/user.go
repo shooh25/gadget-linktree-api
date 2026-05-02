@@ -1,13 +1,15 @@
 package user
 
 type User struct {
-	id      UserId
-	profile Profile
+	userId   UserId
+	googleId string
+	profile  Profile
 }
 
-func NewUser(id UserId, profile Profile) *User {
+func NewUser(userid UserId, googleId string, profile Profile) *User {
 	return &User{
-		id:      id,
+		userId: userid,
+		googleId: googleId,
 		profile: profile,
 	}
 }
