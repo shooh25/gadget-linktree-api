@@ -6,17 +6,17 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-type JWTokenGenerator struct {
+type TokenGeneratorImpl struct {
 	secret []byte
 }
 
-func NewJWTokenGenerator(secret string) *JWTokenGenerator {
-	return &JWTokenGenerator{
+func NewTokenGeneratorImpl(secret string) *TokenGeneratorImpl {
+	return &TokenGeneratorImpl{
 		secret: []byte(secret),
 	}
 }
 
-func (g *JWTokenGenerator) Generate(u *user.User) (string, error) {
+func (g *TokenGeneratorImpl) Generate(u *user.User) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub": u.UserId().Value(),
 		"exp": time.Now().Add(time.Hour * 24).Unix(), // 24時間有効
