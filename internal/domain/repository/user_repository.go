@@ -11,4 +11,7 @@ type UserRepository interface {
 
 	// ユーザー取得
 	FindByUserId(userId user.UserId) (*user.User, error)
+
+	// ログイン時のユーザー取得
+	FindByGoogleId(googleId string) (*user.User, error)
 }
