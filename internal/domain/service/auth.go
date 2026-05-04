@@ -7,7 +7,12 @@ type TokenGenerator interface {
 	Generate(u *user.User) (string, error)
 }
 
-// Google Idトークン検証
+// tokenの検証
+type TokenVerifier interface {
+	Verify(token string) (string, error)
+}
+
+// Google IdToken検証
 type ExternalUserInfo struct {
 	GoogleId    string
 	DisplayName string

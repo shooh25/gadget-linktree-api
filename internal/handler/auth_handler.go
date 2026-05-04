@@ -1,14 +1,18 @@
 package handler
 
 import (
-	"encoding/json"
+	"context"
 	"gadget-linktree-api/internal/application"
 	"gadget-linktree-api/internal/domain/service"
+	authv1 "gadget-linktree-api/proto/auth/v1"
 	"log/slog"
-	"net/http"
+
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type AuthHandler struct {
+	authv1.UnimplementedAuthServiceServer
 	userAuthService  *application.UserAuthService
 	identityProvider service.IdentityProvider
 }
@@ -20,46 +24,28 @@ func NewAuthHandler(authService *application.UserAuthService, identityProvider s
 	}
 }
 
-type LoginRequest struct {	
-	IdToken string `json:"idToken"`
-}
-
-type LoginResponse struct {
-	Token string `json:"token"`
-}
-
-func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
-	var req LoginRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		slog.Warn("failed to decode login request", "err", err)
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
-		return
+func (h *AuthHandler) Login(ctx context.Context, req *authv1.LoginRequest) (*authv1.LoginResponse, error) {
+	// バリデーション
+	if req.GetIdToken() == "" {
+		return nil, status.Error(codes.InvalidArgument, "id_token is required")
 	}
 
-	if req.IdToken == "" {
-		http.Error(w, "idToken is required", http.StatusBadRequest)
-		return
-	}
-
-	// Google Idトークンの検証
-	externalUser, err := h.identityProvider.VerifyToken(req.IdToken)
+	// Google IdTokenの検証
+	externalUser, err := h.identityProvider.VerifyToken(req.GetIdToken())
 	if err != nil {
 		slog.Error("failed to verify google token", "err", err)
-		http.Error(w, "Invalid Id token", http.StatusUnauthorized)
-		return
+		return nil, status.Error(codes.Unauthenticated, "invalid ID token")
 	}
 
 	// アプリケーション層の認証処理
 	token, err := h.userAuthService.Authenticate(*externalUser)
 	if err != nil {
 		slog.Error("failed to authenticate user", "err", err)
-		http.Error(w, "Authentication failed", http.StatusInternalServerError)
-		return
+		return nil, status.Error(codes.Internal, "authentication failed")
 	}
 
 	// 結果の返却
-	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(LoginResponse{Token: token}); err != nil {
-		slog.Error("failed to encode login response", "err", err)
-	}
+	return &authv1.LoginResponse{
+		AccessToken: token,
+	}, nil
 }
