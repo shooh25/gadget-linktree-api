@@ -13,3 +13,15 @@ func NewUser(userid UserId, googleId string, profile Profile) *User {
 		profile: profile,
 	}
 }
+
+func (u *User) UserId() UserId {
+	return u.userId
+}
+
+func (u *User) GoogleId() string {
+	return u.googleId
+}
+
+func (u *User) Profile() Profile {
+	return u.profile
+}

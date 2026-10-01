@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package auth.v1;
+
+option go_package = "gadget-linktree-api/gen/auth/v1;authv1";
+
+// 認証サービス
+service AuthService {
+  // Googleログインを行い、アプリ用のアクセストークンを返却する
+  rpc Login(LoginRequest) returns (LoginResponse);
+}
+
+message LoginRequest {
+  // Googleから発行されたIdトークン
+  string id_token = 1;
+}
+
+message LoginResponse {
+  // アプリ独自のアクセストークン（JWT）
+  string access_token = 1;
+}
